@@ -1,0 +1,38 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Restaurant {
+  id: Int!
+  name: String!
+  veganOnly: Boolean!
+  isGood: Boolean
+}
+
+type Query {
+  getRestaurants(filters: QueryRestaurantDto!): [Restaurant!]!
+}
+
+input QueryRestaurantDto {
+  name: String
+  veganOnly: Boolean
+  isGood: Boolean
+}
+
+type Mutation {
+  createRestaurant(newRestaurant: CreateRestaurantDto!): Restaurant!
+  updateRestaurant(updateRestaurant: UpdateRestaurantDto!): Restaurant!
+}
+
+input CreateRestaurantDto {
+  name: String!
+  veganOnly: Boolean!
+  isGood: Boolean = false
+}
+
+input UpdateRestaurantDto {
+  id: Int!
+  name: String
+  veganOnly: Boolean
+  isGood: Boolean = false
+}
