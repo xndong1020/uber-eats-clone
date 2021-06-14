@@ -749,6 +749,17 @@ export class UpdateRestaurantDto extends IntersectionType(
 ) {}
 ```
 
+Now check the generated schema file:
+
+```gql
+input UpdateRestaurantDto {
+  id: Int!
+  name: String
+  veganOnly: Boolean
+  isGood: Boolean = false
+}
+```
+
 and in our service
 
 ```ts
