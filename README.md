@@ -46,3 +46,7 @@ Table of content:
 1. [#1 GRAPHQL API](./docs/1-GRAPHQL-API.md)
 2. [#2 DATABASE CONFIGURATION](./docs/2-DATABASE-CONFIGURATION.md)
 3. [#3 TYPEORM AND NEST](./docs/3-TYPEORM-AND-NEST.md)
+
+branch is [poc/chap1-3]
+
+4.
