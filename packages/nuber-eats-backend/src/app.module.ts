@@ -3,11 +3,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { CommonModule } from './common/common.module';
 
 import joi from 'joi';
-
-import { RestaurantsModule } from './restaurants/restaurants.module';
-import { Restaurant } from './restaurants/entities/Restaurants.entity';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -34,11 +34,12 @@ import { Restaurant } from './restaurants/entities/Restaurants.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Restaurant],
+      entities: [User],
       synchronize: false,
       logging: ['error', 'query'],
     }),
-    RestaurantsModule,
+    UsersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],

@@ -49,4 +49,6 @@ Table of content:
 
 branch is [poc/chap1-3]
 
-4.
+4. [#4 USER CRUD](./docs/4-USER-CRUD.md)
+
+branch is [poc/chap4]

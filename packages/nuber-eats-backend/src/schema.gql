@@ -2,37 +2,53 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Restaurant {
-  id: Int!
-  name: String!
-  veganOnly: Boolean!
-  isGood: Boolean
+type User {
+  id: Float!
+  createdAt: DateTime
+  updatedAt: DateTime
+  email: String!
+  password: String!
+  role: UserRole!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum UserRole {
+  CLIENT
+  OWNER
+  DELIVERY
+}
+
+type CreateUserResponse {
+  error: String
+  ok: Boolean!
+}
+
+type LoginUserResponse {
+  error: String
+  ok: Boolean!
+  token: String
 }
 
 type Query {
-  getRestaurants(filters: QueryRestaurantDto!): [Restaurant!]!
-}
-
-input QueryRestaurantDto {
-  name: String
-  veganOnly: Boolean
-  isGood: Boolean
+  getUsers: [User!]!
 }
 
 type Mutation {
-  createRestaurant(newRestaurant: CreateRestaurantDto!): Restaurant!
-  updateRestaurant(updateRestaurant: UpdateRestaurantDto!): Restaurant!
+  createUser(newUser: CreateUserDto!): CreateUserResponse!
+  loginUser(loginUser: LoginUserDto!): LoginUserResponse!
 }
 
-input CreateRestaurantDto {
-  name: String!
-  veganOnly: Boolean!
-  isGood: Boolean = false
+input CreateUserDto {
+  email: String!
+  password: String!
+  role: UserRole!
 }
 
-input UpdateRestaurantDto {
-  id: Int!
-  name: String
-  veganOnly: Boolean
-  isGood: Boolean = false
+input LoginUserDto {
+  email: String!
+  password: String!
 }
