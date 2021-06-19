@@ -52,3 +52,7 @@ branch is [poc/chap1-3]
 4. [#4 USER CRUD](./docs/4-USER-CRUD.md)
 
 branch is [poc/chap-4]
+
+5. [#5 USER AUTHENTICATION](./docs/5-USER-AUTHENTICATION.md)
+
+branch is [poc/chap-5]

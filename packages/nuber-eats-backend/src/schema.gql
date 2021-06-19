@@ -35,6 +35,7 @@ type LoginUserResponse {
 
 type Query {
   getUsers: [User!]!
+  me: User!
 }
 
 type Mutation {

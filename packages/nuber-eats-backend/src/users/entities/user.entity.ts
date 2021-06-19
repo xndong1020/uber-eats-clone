@@ -1,26 +1,18 @@
-import {
-  Field,
-  InputType,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { BeforeInsert, Column, Entity } from 'typeorm';
 import { IsEmail, IsEnum, IsString, Length } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { PasswordHelper } from 'src/common/utils/password-helper.util';
-
-enum UserRole {
-  CLIENT = 'client',
-  OWNER = 'owner',
-  DELIVERY = 'delivery',
-}
-
-registerEnumType(UserRole, { name: 'UserRole' });
+import { JwtService } from 'src/jwt/jwt.service';
+import { UserRole } from 'src/common/enums/USER_ROLE.enum';
 
 @InputType({ isAbstract: true })
 @ObjectType()
 @Entity({ name: 'users' })
 export class User extends CoreEntity {
+  constructor(private readonly jwtService: JwtService) {
+    super();
+  }
+
   @Field()
   @Column()
   @IsEmail()
@@ -39,6 +31,6 @@ export class User extends CoreEntity {
 
   @BeforeInsert()
   async hashPassword() {
-    this.password = await PasswordHelper.hashPassword(this.password);
+    this.password = await this.jwtService.hashPassword(this.password);
   }
 }
