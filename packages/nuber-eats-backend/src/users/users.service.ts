@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { SearchUserFilters } from './interfaces/search-user-filters.interface';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { Verification } from './entities/verification.entity';
 
 type QueryResult = [boolean, string?];
 
@@ -15,6 +16,10 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verificationRepository: Repository<Verification>,
+
+    private readonly connection: Connection,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -36,6 +41,12 @@ export class UsersService {
 
       const newUser = this.usersRepository.create(newUserDto);
       await this.usersRepository.save(newUser);
+
+      const verification = this.verificationRepository.create({
+        user: newUser,
+      });
+      await this.verificationRepository.save(verification);
+
       return [true];
     } catch (e) {
       console.error('error', e);
@@ -86,6 +97,46 @@ export class UsersService {
       return [true, null, await this.jwtService.sign({ id: userInDb.id })];
     } catch (e) {
       console.error(e);
+      return [false, e.message];
+    }
+  }
+
+  async verifyEmail(verificationCode: string): Promise<QueryResult> {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const verificationRecord = await this.verificationRepository.findOneOrFail(
+        {
+          code: verificationCode,
+        },
+        { relations: ['user'] },
+      );
+
+      const userInDb = await this.usersRepository.findOneOrFail({
+        id: verificationRecord.user.id,
+      });
+
+      userInDb.verified = true;
+
+      try {
+        await queryRunner.manager.save<User>(userInDb);
+        await queryRunner.manager.delete<Verification>(Verification, {
+          code: verificationCode,
+        });
+
+        await queryRunner.commitTransaction();
+        return [true];
+      } catch (e) {
+        console.error('error', e);
+        await queryRunner.rollbackTransaction();
+        return [false, e.message];
+      } finally {
+        // you need to release a queryRunner which was manually instantiated
+        await queryRunner.release();
+      }
+    } catch (e) {
+      console.error('error', e);
       return [false, e.message];
     }
   }

@@ -56,3 +56,7 @@ branch is [poc/chap-4]
 5. [#5 USER AUTHENTICATION](./docs/5-USER-AUTHENTICATION.md)
 
 branch is [poc/chap-5]
+
+6. [#6 EMAIL VERIFICATION](./docs/6-EMAIL-VERIFICATION.md)
+
+branch is [poc/chap-6]

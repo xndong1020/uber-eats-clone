@@ -16,7 +16,11 @@ export class JwtMiddleware implements NestMiddleware {
       return;
     }
 
-    if (!['createUser', 'loginUser'].includes(req.body.operationName)) {
+    if (
+      !['createUser', 'loginUser', 'verifyEmail'].includes(
+        req.body.operationName,
+      )
+    ) {
       const bearerHeader = req.headers['authorization'];
       if (!bearerHeader) throw new Error('Unauthorized.');
 

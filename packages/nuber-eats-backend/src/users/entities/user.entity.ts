@@ -1,9 +1,10 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
-import { IsEmail, IsEnum, IsString, Length } from 'class-validator';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToOne } from 'typeorm';
+import { IsBoolean, IsEmail, IsEnum, IsString, Length } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { UserRole } from 'src/common/enums/USER_ROLE.enum';
+import { Verification } from './verification.entity';
 
 @InputType({ isAbstract: true })
 @ObjectType()
@@ -32,6 +33,11 @@ export class User extends CoreEntity {
   @Column({ type: 'enum', enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
+
+  @Field(type => Boolean)
+  @Column()
+  @IsBoolean()
+  verified: boolean;
 
   @BeforeInsert()
   @BeforeUpdate()

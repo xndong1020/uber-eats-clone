@@ -16,6 +16,7 @@ import { RoleGuard } from 'src/auth/role-guard';
 import { UserRole } from 'src/common/enums/USER_ROLE.enum';
 import { UpdateUserResponse } from './dtos/update-user.response';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { VerifyEmailResponse } from './dtos/verify-email.response';
 
 @Resolver(of => User)
 export class UsersResolver {
@@ -33,7 +34,7 @@ export class UsersResolver {
   @UseGuards(
     AuthGuard,
     EnvGuard.setAllowedEnvs([NODE_ENV.DEV, NODE_ENV.SIT]),
-    RoleGuard.setAllowedRoles([UserRole.CLIENT]),
+    RoleGuard.setAllowedRoles([UserRole.CLIENT, UserRole.OWNER]),
   )
   async me(@AuthUser() authUser: User): Promise<User> {
     return authUser;
@@ -66,5 +67,11 @@ export class UsersResolver {
   ): Promise<LoginUserResponse> {
     const [ok, error, token] = await this.usersService.loginUser(loginUser);
     return { ok, error, token };
+  }
+
+  @Mutation(returns => VerifyEmailResponse)
+  async verifyEmail(@Args('verificationCode') verificationCode: string) {
+    const [ok, error] = await this.usersService.verifyEmail(verificationCode);
+    return { ok, error };
   }
 }

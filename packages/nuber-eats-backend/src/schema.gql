@@ -9,6 +9,7 @@ type User {
   email: String!
   password: String!
   role: UserRole!
+  verified: Boolean!
 }
 
 """
@@ -38,6 +39,11 @@ type UpdateUserResponse {
   ok: Boolean!
 }
 
+type VerifyEmailResponse {
+  error: String
+  ok: Boolean!
+}
+
 type Query {
   getUsers: [User!]!
   me: User!
@@ -47,6 +53,7 @@ type Mutation {
   createUser(newUser: CreateUserDto!): CreateUserResponse!
   updateUser(updateUser: UpdateUserDto!): UpdateUserResponse!
   loginUser(loginUser: LoginUserDto!): LoginUserResponse!
+  verifyEmail(verificationCode: String!): VerifyEmailResponse!
 }
 
 input CreateUserDto {
