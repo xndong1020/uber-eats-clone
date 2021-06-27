@@ -14,6 +14,8 @@ import { NODE_ENV } from 'src/common/enums/NODE_ENV.enum';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { RoleGuard } from 'src/auth/role-guard';
 import { UserRole } from 'src/common/enums/USER_ROLE.enum';
+import { UpdateUserResponse } from './dtos/update-user.response';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Resolver(of => User)
 export class UsersResolver {
@@ -42,6 +44,19 @@ export class UsersResolver {
     @Args('newUser') newUser: CreateUserDto,
   ): Promise<CreateUserResponse> {
     const [ok, error] = await this.usersService.createUser(newUser);
+    return { ok, error };
+  }
+
+  @Mutation(returns => UpdateUserResponse)
+  @UseGuards(AuthGuard, EnvGuard.setAllowedEnvs([NODE_ENV.DEV, NODE_ENV.SIT]))
+  async updateUser(
+    @Args('updateUser') updateUser: UpdateUserDto,
+    @AuthUser() authUser: User,
+  ): Promise<UpdateUserResponse> {
+    const [ok, error] = await this.usersService.updateUser(
+      authUser,
+      updateUser,
+    );
     return { ok, error };
   }
 

@@ -33,6 +33,11 @@ type LoginUserResponse {
   token: String
 }
 
+type UpdateUserResponse {
+  error: String
+  ok: Boolean!
+}
+
 type Query {
   getUsers: [User!]!
   me: User!
@@ -40,6 +45,7 @@ type Query {
 
 type Mutation {
   createUser(newUser: CreateUserDto!): CreateUserResponse!
+  updateUser(updateUser: UpdateUserDto!): UpdateUserResponse!
   loginUser(loginUser: LoginUserDto!): LoginUserResponse!
 }
 
@@ -47,6 +53,12 @@ input CreateUserDto {
   email: String!
   password: String!
   role: UserRole!
+}
+
+input UpdateUserDto {
+  email: String
+  password: String
+  role: UserRole
 }
 
 input LoginUserDto {

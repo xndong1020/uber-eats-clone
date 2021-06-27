@@ -1,5 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import { IsEmail, IsEnum, IsString, Length } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { JwtService } from 'src/jwt/jwt.service';
@@ -11,6 +11,10 @@ import { UserRole } from 'src/common/enums/USER_ROLE.enum';
 export class User extends CoreEntity {
   constructor(private readonly jwtService: JwtService) {
     super();
+    this.jwtService = new JwtService({
+      isGlobal: true,
+      secretKey: process.env.SECRET_KEY,
+    });
   }
 
   @Field()
@@ -30,6 +34,7 @@ export class User extends CoreEntity {
   role: UserRole;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
     this.password = await this.jwtService.hashPassword(this.password);
   }

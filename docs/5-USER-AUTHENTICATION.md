@@ -790,3 +790,159 @@ Then use this decorator function from resolver
     return authUser;
   }
 ```
+
+#### Create User and login user does not need auth token
+
+```ts
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { UsersService } from 'src/users/users.service';
+import { JwtService } from './jwt.service';
+
+@Injectable()
+export class JwtMiddleware implements NestMiddleware {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
+  ) {}
+  async use(req: Request, res: Response, next: () => void) {
+    // IntrospectionQuery is from Graphql playground auto schema polling
+    if (req.body.operationName === 'IntrospectionQuery') {
+      next();
+      return;
+    }
+
+    // no token required for 'createUser', 'loginUser'
+    if (!['createUser', 'loginUser'].includes(req.body.operationName)) {
+      const bearerHeader = req.headers['authorization'];
+      if (!bearerHeader) throw new Error('Unauthorized.');
+
+      const bearer = bearerHeader.split(' ');
+      const bearerToken = bearer[1];
+      const decoded = this.jwtService.verify(bearerToken);
+      if (typeof decoded === 'object' && 'id' in decoded) {
+        console.log('decoded 1', decoded['id']);
+        try {
+          const user = await this.usersService.getOne({ id: decoded['id'] });
+          req['user'] = user; // add user object to the request object
+        } catch (e) {
+          console.error('error', e);
+          throw new Error('Unauthorized.');
+        }
+      }
+    }
+
+    next();
+  }
+}
+```
+
+#### update user
+
+UsersService.ts
+
+Note:
+In the documentation it says that updates must be made directly to the model
+https://github.com/typeorm/typeorm/blob/master/docs/listeners-and-subscribers.md#beforeupdate
+
+Otherwise the ` @BeforeUpdate()` hook won't work
+https://github.com/typeorm/typeorm/issues/2036
+
+```ts
+async updateUser(
+    authUser: User,
+    updateUserDto: UpdateUserDto,
+  ): Promise<QueryResult> {
+    try {
+      const userInDb = await this.usersRepository.findOne({
+        email: authUser.email,
+      });
+
+      if (!userInDb) throw new Error('User not found');
+
+      // In the documentation it says that updates must be made directly to the model
+      // https://github.com/typeorm/typeorm/blob/master/docs/listeners-and-subscribers.md#beforeupdate
+      Object.keys(updateUserDto).forEach(key => {
+        userInDb[key] = updateUserDto[key];
+      });
+
+      await this.usersRepository.save(userInDb);
+      return [true];
+    } catch (e) {
+      console.error('error', e);
+      return [false, e.message];
+    }
+  }
+```
+
+Resolver:
+
+```ts
+ @Mutation(returns => UpdateUserResponse)
+  @UseGuards(AuthGuard, EnvGuard.setAllowedEnvs([NODE_ENV.DEV, NODE_ENV.SIT]))
+  async updateUser(
+    @Args('updateUser') updateUser: UpdateUserDto,
+    @AuthUser() authUser: User,
+  ): Promise<UpdateUserResponse> {
+    const [ok, error] = await this.usersService.updateUser(
+      authUser,
+      updateUser,
+    );
+    return { ok, error };
+  }
+```
+
+UpdateUserDto. It may contain 1 or many properties, includes 'email', 'password', 'role'
+
+```ts
+import { InputType, PartialType, PickType } from '@nestjs/graphql';
+import { User } from '../entities/user.entity';
+
+@InputType()
+export class UpdateUserDto extends PartialType(
+  PickType(User, ['email', 'password', 'role'] as const),
+) {}
+```
+
+Test query
+
+```
+mutation updateUser($UpdateUser: UpdateUserDto!) {
+  updateUser(updateUser: $UpdateUser) {
+    error
+    ok
+  }
+}
+```
+
+Query variables
+
+```
+{
+  "UpdateUser": {
+    "password": "123456",
+    "role": "CLIENT"
+  }
+}
+```
+
+MUST have a valid token in HTTP Header
+
+```
+{
+  "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjI0NzUxMDk1fQ.kYXvBCwH7m8ZX09XnV2IVZDFD2Re7TP9X4C5wJKSnrM"
+}
+```
+
+query result
+
+```json
+{
+  "data": {
+    "updateUser": {
+      "error": null,
+      "ok": true
+    }
+  }
+}
+```

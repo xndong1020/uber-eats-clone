@@ -12,5 +12,5 @@ CREATE TABLE "users"
 );
 
 INSERT INTO "users"(email, password, role) VALUES 
-('Jeremy Gu', '1234', 'owner'),
-('Nicole Dong', '5678', 'owner');
+('test1@test.com', '$2b$10$3OqozyrnB0Iuakk7yAnd4.GzNmlZA4heo1wyrLYiPGgRDrGqVnJF6', 'owner'),
+('test2@test.com', '$2b$10$3OqozyrnB0Iuakk7yAnd4.GzNmlZA4heo1wyrLYiPGgRDrGqVnJF6', 'owner'); --- 123456
