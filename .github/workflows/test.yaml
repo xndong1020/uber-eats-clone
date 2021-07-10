@@ -10,16 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Check out repository
-      uses: actions/checkout@v2
-      with: 
-          ref: master
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+            ref: master
 
-    - name: Run a one line script
-      run: echo hello, world!
+      - name: Run a one line script
+        run: echo hello, world!
 
-    - name: Run a multiple line script
-      run: 
-        echo Add other actions to build
-        echo test, and deploy your project
+      - name: Run a multiple line script
+        run: 
+          echo Add other actions to build
+          echo test, and deploy your project
