@@ -8,6 +8,7 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { SearchUserFilters } from './interfaces/search-user-filters.interface';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { Verification } from './entities/verification.entity';
+import { PasswordHelper } from 'src/common/utils/PasswordHelper';
 
 type QueryResult = [boolean, string?];
 
@@ -49,7 +50,6 @@ export class UsersService {
 
       return [true];
     } catch (e) {
-      console.error('error', e);
       return [false, e.message];
     }
   }
@@ -59,22 +59,19 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
   ): Promise<QueryResult> {
     try {
-      const userInDb = await this.usersRepository.findOne({
+      const userInDb = await this.usersRepository.findOneOrFail({
         email: authUser.email,
       });
 
-      if (!userInDb) throw new Error('User not found');
-
       // In the documentation it says that updates must be made directly to the model
       // https://github.com/typeorm/typeorm/blob/master/docs/listeners-and-subscribers.md#beforeupdate
-      Object.keys(updateUserDto).forEach(key => {
+      Object.keys(updateUserDto).forEach((key) => {
         userInDb[key] = updateUserDto[key];
       });
 
       await this.usersRepository.save(userInDb);
       return [true];
     } catch (e) {
-      console.error('error', e);
       return [false, e.message];
     }
   }
@@ -84,11 +81,9 @@ export class UsersService {
     password,
   }: LoginUserDto): Promise<[boolean, string?, string?]> {
     try {
-      const userInDb = await this.usersRepository.findOne({ email });
+      const userInDb = await this.usersRepository.findOneOrFail({ email });
 
-      if (!userInDb) throw new Error('Invalid email/password');
-
-      const isPasswordMatch = await this.jwtService.validatePassword(
+      const isPasswordMatch = await PasswordHelper.validatePassword(
         password,
         userInDb.password,
       );
@@ -96,7 +91,6 @@ export class UsersService {
 
       return [true, null, await this.jwtService.sign({ id: userInDb.id })];
     } catch (e) {
-      console.error(e);
       return [false, e.message];
     }
   }
@@ -106,12 +100,13 @@ export class UsersService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const verificationRecord = await this.verificationRepository.findOneOrFail(
-        {
-          code: verificationCode,
-        },
-        { relations: ['user'] },
-      );
+      const verificationRecord =
+        await this.verificationRepository.findOneOrFail(
+          {
+            code: verificationCode,
+          },
+          { relations: ['user'] },
+        );
 
       const userInDb = await this.usersRepository.findOneOrFail({
         id: verificationRecord.user.id,

@@ -60,3 +60,6 @@ branch is [poc/chap-5]
 6. [#6 EMAIL VERIFICATION](./docs/6-EMAIL-VERIFICATION.md)
 
 branch is [poc/chap-6]
+
+7. [#7 UNIT TESTING THE USER SERVICE] (./docs/7-UNIT-TESTING-THE-USER-SERVICE.md)
+   branch is [poc/chap-7]
