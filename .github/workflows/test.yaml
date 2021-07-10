@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
   steps:
-  - uses: actions/checkout@v2
-    with:
-      ref: master
+  - name: Check out repository
+    uses: actions/checkout@v2
+    with: 
+        ref: master
 
   - name: Run a one line script
     run: echo hello, world!
